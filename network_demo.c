@@ -22,6 +22,7 @@
 #include "qosa_ip_addr.h"
 #include "qosa_event_notify.h"
 
+#include "unirtos_app_init_registry.h"
 #define QOS_LOG_TAG                       LOG_TAG_DEMO
 
 /** network demo maximum wait time for network attachment, unit: seconds */
@@ -43,7 +44,7 @@ typedef struct nw_msg
         qosa_nw_reg_signal_quality_event_t signal_quality; /*!< signal quality update */
         qosa_nw_rrc_conn_event_t           rrc_conn;       /*!< RRC connection update */
         qosa_nw_nitz_event_t               nitz_info;      /*!< NITZ info update */
-        qosa_nw_nas_event_t                nas_event_info; /*!< nas event update */
+        qosa_nw_reject_event_t             nw_reject_info; /*!< nw reject event update */
     };
 
 } nw_demo_nw_msg_t;
@@ -52,8 +53,8 @@ typedef struct nw_msg
 qosa_task_t g_nw_task = QOSA_NULL;
 /** network demo CFUN operation semaphore */
 qosa_sem_t g_nw_demo_cfun_sem = QOSA_NULL;
-/** network demo NAS event information */
-qosa_nw_nas_event_t g_nw_demo_nas_event = {0};
+/** network demo reject event information */
+qosa_nw_reject_event_t g_nw_reject_info = {0};
 
 /**
  * @brief network demo event callback function
@@ -154,12 +155,12 @@ static int network_event_cb(void *user_argv, void *argv)
         case QOSA_EVENT_MODEM_NW_NAS_EVENT: {
             // QLOGI("QOSA_EVENT_MODEM_NW_NAS_EVENT coming");
 
-            qosa_memcpy(&msg->nas_event_info, argv, sizeof(qosa_nw_nas_event_t));
+            qosa_memcpy(&msg->nw_reject_info, argv, sizeof(qosa_nw_reject_event_t));
 
-            QLOGI("event_type=%d,cause=%d", msg->nas_event_info.event_type, msg->nas_event_info.reject_cause);
+            QLOGI("event_type=%d,cause=%d", msg->nw_reject_info.reject_info.type, msg->nw_reject_info.reject_info.reject_cause);
 
-            g_nw_demo_nas_event.event_type = msg->nas_event_info.event_type;
-            g_nw_demo_nas_event.reject_cause = msg->nas_event_info.reject_cause;
+            g_nw_reject_info.reject_info.type = msg->nw_reject_info.reject_info.type;
+            g_nw_reject_info.reject_info.reject_cause = msg->nw_reject_info.reject_info.reject_cause;
             break;
         }
         default:
@@ -204,7 +205,7 @@ static void nw_demo_set_cfun_cb(void *ctx, void *argv)
 static qosa_uint8_t nw_demo_lte_get_csq_rssi(qosa_rssi_t lte_rssi)
 {
     qosa_int16_t rssi = 0;
-    
+
     QLOGI("input rssi:%d", lte_rssi);
 
     // Invalid value converted to 99
@@ -219,9 +220,9 @@ static qosa_uint8_t nw_demo_lte_get_csq_rssi(qosa_rssi_t lte_rssi)
 
     //range constraint
     rssi = ((rssi == 99) ? 99 : ((rssi > 31) ? 31 : ((rssi > 0) ? rssi : 0)));
-    
+
     QLOGI("lte csq rssi:%d", rssi);
-    
+
     return rssi;
 }
 
@@ -268,7 +269,7 @@ static void nw_demo_task(void *arg)
     // Register NITZ information report event callback
     qosa_event_notify_register(QOSA_EVENT_MODEM_NW_NITZ_INFO, network_event_cb, (void *)QOSA_EVENT_MODEM_NW_NITZ_INFO);
     // Register NAS report event callback
-    qosa_event_notify_register(QOSA_EVENT_MODEM_NW_NAS_EVENT, network_event_cb, (void *)QOSA_EVENT_MODEM_NW_NAS_EVENT);
+    qosa_event_notify_register(QOSA_EVENT_MODEM_NW_REJECT_EVENT, network_event_cb, (void *)QOSA_EVENT_MODEM_NW_NAS_EVENT);
 
     // Get current SIM card status to check if there are any issues in the SIM card status
     ret = qosa_sim_read_status(simid, &status);
@@ -331,9 +332,9 @@ static void nw_demo_task(void *arg)
         }
 
         // Check if there are any NAS events reported
-        if (g_nw_demo_nas_event.event_type == QOSA_NW_NAS_ATTACH_REJECT && g_nw_demo_nas_event.reject_cause != 0)
+        if (g_nw_reject_info.reject_info.reject_cause != 0)
         {
-            QLOGI("attach fail,nas event[%d] cause[%d] has been report!", g_nw_demo_nas_event.event_type, g_nw_demo_nas_event.reject_cause);
+            QLOGI("attach fail,nw reject event cause[%d] has been report!", g_nw_reject_info.reject_info.reject_cause);
             /*
             Rejection value                      Description                                                 Possible reasons
             15              No Suitable Cells In tracking area                          SIM card arrears, check SIM card
@@ -377,8 +378,8 @@ static void nw_demo_task(void *arg)
             }
         }
     }
-    g_nw_demo_nas_event.event_type = 0;
-    g_nw_demo_nas_event.reject_cause = 0;
+    g_nw_reject_info.reject_info.type = 0;
+    g_nw_reject_info.reject_info.reject_cause = 0;
     while (1)
     {
         // If attach successful, execute loop once every 10 seconds to get network parameters
@@ -471,3 +472,5 @@ void unir_network_demo_init(void)
         return;
     }
 }
+
+UNIRTOS_APP_EXPORT(110, "network_demo", unir_network_demo_init);
