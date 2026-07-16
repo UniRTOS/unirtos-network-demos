@@ -1,55 +1,57 @@
 # unirtos-network-demos
 
-本仓库推荐通过 unirtos-cli 的 demo 工作流使用，以保证创建、环境拉取和编译流程一致。
+[中文](README.zh.md) | English
 
-## 功能描述
+This repository is recommended to be used through the unirtos-cli demo workflow to ensure consistency in project creation, environment setup, and build procedures.
 
-本 Demo 用于演示 UniRTOS 网络能力的基础使用流程，适合作为网络类应用的起点。
+## Feature Description
 
-- 展示网络相关组件的初始化与基础调用路径
-- 提供网络功能验证的最小可运行样例
-- 便于在此基础上扩展协议、连接与数据收发逻辑
+This demo is used to demonstrate the basic workflow of UniRTOS network capabilities and is suitable as a starting point for network-based applications.
 
-## 快速上手
+- Demonstrates the initialization of network-related components and the basic invocation flow
+- Provides a minimal runnable example for network feature verification
+- Makes it easy to extend protocol, connection, and data send/receive logic on this basis
 
-### 1. 安装 UniRTOS 工具链
+## Quick Start
 
-- [开发准备](https://www.quectel.com.cn/unirtos/docs?docs_page=快速上手/开发准备/开发准备.html)
-- [安装交叉编译工具链](https://www.quectel.com.cn/unirtos/docs?docs_page=快速上手/环境搭建/环境搭建.html)
-- [安装 Python3](https://www.python.org/downloads/)
-- [安装 git](https://git-scm.com)
-- 安装 `unirtos-cli`：`pip install unirtos-cli`
+### 1. Install the UniRTOS Toolchain
 
-以上工具安装完成后，确认以下命令可用：
+- [Development Preparation](https://www.quectel.com.cn/unirtos/docs?docs_page=快速上手/开发准备/开发准备.html)
+- [Install the Cross-Compilation Toolchain](https://www.quectel.com.cn/unirtos/docs?docs_page=快速上手/环境搭建/环境搭建.html)
+- [Install Python3](https://www.python.org/downloads/)
+- [Install git](https://git-scm.com)
+- Install `unirtos-cli`: `pip install unirtos-cli`
+
+After the above tools are installed, confirm that the following commands are available:
 
 ```bash
 python --version # Python3
 git --version
-unirtos --version # 1.0.5 及以上版本
-unirtos-cli version # 1.0.11 及以上版本
+unirtos --version # version 1.0.5 or later
+unirtos-cli version # version 1.0.11 or later
 ```
 
-### 2. 使用 unirtos-cli 拉取 demo
+### 2. Fetch the Demo Using unirtos-cli
 
-先查看可用 demo 与版本：
+First, check the available demos and versions:
 
 ```bash
 unirtos-cli ls-demos
 ```
 
-创建本 demo 工程：
+Create this demo project:
 
 ```bash
 unirtos-cli new -r unirtos-network-demos
 ```
 
-如需指定版本：
+To specify a version:
 
 ```bash
 unirtos-cli new -r unirtos-network-demos -v 1.0.0
 ```
 
-### 3. 进入工程并编译
+### 3. Enter the Project and Build
 
 ```bash
 cd unirtos-network-demos-1.0.0
@@ -57,24 +59,24 @@ unirtos-cli env-setup
 unirtos-cli build
 ```
 
-## 常用命令
+## Common Commands
 
 ```bash
-# 打开 SDK 菜单配置
+# Open the SDK menu configuration
 unirtos-cli menuconfig
 
-# 清理构建产物
+# Clean build artifacts
 unirtos-cli clean
 ```
 
-## 技术社区
+## Technical Community
 
-技术社区：https://forumschinese.quectel.com/c/66-category/66
+Technical Community: https://forumschinese.quectel.com/c/66-category/66
 
-## 贡献指南
+## Contribution Guide
 
-欢迎参与共建，建议按以下方式提交：
-- 提交前先执行一次基础验证：env-setup、build、clean。
-- 使用清晰的提交说明，描述改动目的、影响范围和验证结果。
-- 新增功能或行为变化时，同步更新 README 与相关文档。
-- 通过 Issue 或 Pull Request 提交问题修复与功能改进。
+Contributions are welcome. It is recommended to submit changes in the following way:
+- Run a basic verification before submission: env-setup, build, clean.
+- Use clear commit messages describing the purpose of the change, scope of impact, and verification results.
+- When adding new features or changing behavior, update the README and related documentation accordingly.
+- Submit bug fixes and feature improvements through Issues or Pull Requests.
